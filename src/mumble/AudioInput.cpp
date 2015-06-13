@@ -14,6 +14,7 @@
 #include "User.h"
 #include "PacketDataStream.h"
 #include "Plugins.h"
+#include "System.h"
 #include "Message.h"
 #include "Global.h"
 #include "NetworkConfig.h"
@@ -804,13 +805,11 @@ void AudioInput::encodeAudioFrame() {
 	if (! bIsSpeech && ! bPreviousVoice) {
 		iBitrate = 0;
 
-		if (g.s.iaeIdleAction != Settings::Nothing && ((tIdle.elapsed() / 1000000ULL) > g.s.iIdleTime)) {
+		if (g.s.iaeIdleAction != Settings::Nothing && (System::getIdleSeconds() > g.s.iIdleTime)) {
 
 			if (g.s.iaeIdleAction == Settings::Deafen && !g.s.bDeaf) {
-				tIdle.restart();
 				emit doDeaf();
 			} else if (g.s.iaeIdleAction == Settings::Mute && !g.s.bMute) {
-				tIdle.restart();
 				emit doMute();
 			}
 		}
@@ -826,8 +825,6 @@ void AudioInput::encodeAudioFrame() {
 	if (bIsSpeech && !bPreviousVoice) {
 		bResetEncoder = true;
 	}
-
-	tIdle.restart();
 
 	EncodingOutputBuffer buffer;
 	Q_ASSERT(buffer.size() >= static_cast<size_t>(iAudioQuality / 100 * iAudioFrames / 8));
